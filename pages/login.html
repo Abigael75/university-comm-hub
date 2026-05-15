@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Kabianga Comm Hub | Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #eef2f7 0%, #d9e2ec 100%);
+      min-height: 100vh;
+      padding: 1.5rem;
+    }
+
+    .dashboard-wrapper {
+      background: white;
+      border-radius: 2rem;
+      box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.15);
+      max-width: 1400px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+
+    .dashboard-header {
+      background: #0a2f44;
+      padding: 1rem 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      color: white;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.3rem;
+    }
+
+    .brand i {
+      font-size: 1.6rem;
+      color: #ffc857;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      background: rgba(255, 255, 255, 0.12);
+      padding: 0.4rem 1.2rem;
+      border-radius: 40px;
+    }
+
+    .user-info span {
+      font-weight: 500;
+    }
+
+    .logout-btn {
+      background: #ffc857;
+      border: none;
+      padding: 0.4rem 1rem;
+      border-radius: 2rem;
+      font-weight: 600;
+      color: #0a2f44;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 0.85rem;
+    }
+
+    .logout-btn:hover {
+      background: #ffb82e;
+      transform: scale(0.97);
+    }
+
+    /* role tagline */
+    .role-badge {
+      background: #f5f9fe;
+      margin: 1.5rem 2rem 0 2rem;
+      padding: 0.6rem 1.2rem;
+      border-radius: 40px;
+      display: inline-block;
+      font-size: 0.9rem;
+      color: #0a2f44;
+      font-weight: 500;
+    }
+
+    .dashboard-title {
+      padding: 1rem 2rem 0rem 2rem;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #0a2f44;
+      border-bottom: 3px solid #ffc857;
+      display: inline-block;
+      margin-left: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.8rem;
+      padding: 2rem;
+    }
+
+    .dashboard-card {
+      background: #ffffff;
+      border-radius: 1.5rem;
+      padding: 1.8rem 1rem 1.5rem 1rem;
+      text-align: center;
+      box-shadow: 0 12px 25px -8px rgba(0, 0, 0, 0.08);
+      transition: all 0.25s ease;
+      cursor: pointer;
+      border: 1px solid #e9f0f5;
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.15);
+      border-color: #ffc857;
+    }
+
+    .card-icon {
+      font-size: 2.5rem;
+      color: #0a2f44;
+      background: #eef2fa;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      margin: 0 auto 1rem auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dashboard-card h3 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #1e2f3e;
+    }
+
+    .dashboard-card p {
+      font-size: 0.85rem;
+      color: #5f7f9a;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      border-top: 1px solid #eef2f7;
+      font-size: 0.75rem;
+      color: #4a627a;
+    }
+
+    @media (max-width: 650px) {
+      .cards-grid {
+        grid-template-columns: 1fr;
+        padding: 1.5rem;
+      }
+      .dashboard-header {
+        flex-direction: column;
+        text-align: center;
+      }
+      .dashboard-title {
+        font-size: 1.4rem;
+        margin-left: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="dashboard-wrapper">
+  <div class="dashboard-header">
+    <div class="brand">
+      <i class="fas fa-comments"></i>
+      <span>Kabianga Comm Hub</span>
+    </div>
+    <div class="user-info">
+      <i class="fas fa-user-circle"></i>
+      <span id="dashboardUserName">User</span>
+      <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </div>
+  <div id="dynamicDashboardContent"></div>
+  <footer>© 2025 University of Kabianga · Connecting Students, Lecturers, and Administration</footer>
+</div>
+
+<script>  const VALID_USERS = [    { username: "S002", password: "student", role: "student", fullName: "Jane Atieno (Student)" },
+    { username: "L001", password: "lecturer", role: "lecturer", fullName: "Dr. Otieno (Lecturer)" },
+    { username: "L002", password: "lecturer", role: "lecturer", fullName: "Prof. Wanjiku (Lecturer)" },
+    { username: "A001", password: "admin", role: "admin", fullName: "Admin Kabianga" }
+  ];
+
+  function authenticateUser(username, password) {
+    return VALID_USERS.find(user => user.username === username && user.password === password);
+  }
+
+  function handleLogin() {
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errorDiv = document.getElementById('loginError');
+    errorDiv.style.display = 'none';
+
+    if (!username || !password) {
+      errorDiv.innerText = '❌ Please enter Username and Password.';
+      errorDiv.style.display = 'block';
+      return;
+    }
+
+    const user = authenticateUser(username, password);
+    if (!user) {
+      errorDiv.innerText = '❌ Invalid credentials. Use S001/student, L001/lecturer, A001/admin';
+      errorDiv.style.display = 'block';
+      return;
+    }
+    const sessionData = {
+      username: user.username,
+      role: user.role,
+      fullName: user.fullName
+    };
+
+    const remember = document.getElementById('rememberMeCheckbox').checked;
+    if (remember) {
+      localStorage.setItem('commHubSession', JSON.stringify(sessionData));
+      localStorage.setItem('remUsername', username);
+    } else {
+      sessionStorage.setItem('commHubSession', JSON.stringify(sessionData));
+      localStorage.removeItem('remUsername');
+    }
+    window.location.href = 'dashboard.html';
+  }
+  const savedUsername = localStorage.getItem('remUsername');
+  if (savedUsername) {
+    document.getElementById('loginUsername').value = savedUsername;
+    document.getElementById('rememberMeCheckbox').checked = true;
+  }
+  document.getElementById('signinBtn').addEventListener('click', handleLogin);
+  document.getElementById('forgotPwdLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    alert("📞 Forgot password? Contact IT support: support@kabianga.ac.ke");
+  });
+  const pwdField = document.getElementById('loginPassword');
+  pwdField.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleLogin();
+  })
+</script>
+<script src="/js/graphql.js"></script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+// js/bootstrap-pwa.js
+// This file adds PWA features to your existing login.html and dashboard.html
+
+// 1. Register Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('/sw.js');
+      console.log('Service Worker registered with scope:', registration.scope);
+      
+      // Wait for service worker to be ready
+      await navigator.serviceWorker.ready;
+      
+      // Initialize PWA features
+      initOfflineSupport();
+      initPushNotifications(registration);
+      
+    } catch (error) {
+      console.error('Service Worker registration failed:', error);
+    }
+  });
+}
+
+// 2. Offline Support
+function initOfflineSupport() {
+  // Show offline indicator when network is lost
+  window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  
+  function updateOnlineStatus() {
+    const offlineIndicator = document.getElementById('offline-indicator');
+    if (!navigator.onLine) {
+      if (!offlineIndicator) {
+        const indicator = document.createElement('div');
+        indicator.id = 'offline-indicator';
+        indicator.className = 'offline-banner';
+        indicator.innerHTML = '⚠️ You are offline. Some features may be limited.';
+        document.body.prepend(indicator);
+      }
+    } else {
+      if (offlineIndicator) offlineIndicator.remove();
+      // Sync pending data when back online
+      syncOfflineData();
+    }
+  }
+}
+
+// 3. Push Notifications
+async function initPushNotifications(registration) {
+  const permission = await Notification.requestPermission();
+  
+  if (permission === 'granted') {
+    // Check if user is logged in (from your existing auth)
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    if (user.id) {
+      await subscribeToPushNotifications(registration, user);
+    }
+  }
+}
+
+async function subscribeToPushNotifications(registration, user) {
+  try {
+    const subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(
+        'YOUR_VAPID_PUBLIC_KEY' // Get from backend
+      )
+    });
+    
+    // Send to your existing backend
+    await fetch('http://localhost:4000/api/save-subscription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: user.id,
+        subscription: subscription
+      })
+    });
+    
+    console.log('Push notification subscribed');
+  } catch (error) {
+    console.error('Push subscription failed:', error);
+  }
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+// 4. Offline Data Sync
+async function syncOfflineData() {
+  const pendingActions = JSON.parse(localStorage.getItem('pendingActions') || '[]');
+  
+  if (pendingActions.length > 0) {
+    for (const action of pendingActions) {
+      try {
+        await fetch(action.url, {
+          method: action.method,
+          headers: action.headers,
+          body: JSON.stringify(action.data)
+        });
+        // Remove synced action
+        const updatedActions = pendingActions.filter(a => a.id !== action.id);
+        localStorage.setItem('pendingActions', JSON.stringify(updatedActions));
+      } catch (error) {
+        console.error('Failed to sync action:', action);
+      }
+    }
+  }
+}
+
+// 5. Cache role-based data
+function cacheRoleBasedData(role, data) {
+  const cacheKey = `cached_${role}_data`;
+  const cacheData = {
+    data: data,
+    timestamp: Date.now(),
+    role: role
+  };
+  localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+}
+
+function getCachedRoleData(role, maxAge = 3600000) { // 1 hour
+  const cacheKey = `cached_${role}_data`;
+  const cached = localStorage.getItem(cacheKey);
+  
+  if (!cached) return null;
+  
+  const parsed = JSON.parse(cached);
+  const isExpired = Date.now() - parsed.timestamp > maxAge;
+  
+  return isExpired ? null : parsed.data;
+}

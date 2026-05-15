@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Kabianga Comm Hub | Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #eef2f7 0%, #d9e2ec 100%);
+      min-height: 100vh;
+      padding: 1.5rem;
+    }
+
+    .dashboard-wrapper {
+      background: white;
+      border-radius: 2rem;
+      box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.15);
+      max-width: 1400px;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+
+    .dashboard-header {
+      background: #0a2f44;
+      padding: 1rem 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      color: white;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.3rem;
+    }
+
+    .brand i {
+      font-size: 1.6rem;
+      color: #ffc857;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      background: rgba(255, 255, 255, 0.12);
+      padding: 0.4rem 1.2rem;
+      border-radius: 40px;
+    }
+
+    .user-info span {
+      font-weight: 500;
+    }
+
+    .logout-btn {
+      background: #ffc857;
+      border: none;
+      padding: 0.4rem 1rem;
+      border-radius: 2rem;
+      font-weight: 600;
+      color: #0a2f44;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 0.85rem;
+    }
+
+    .logout-btn:hover {
+      background: #ffb82e;
+      transform: scale(0.97);
+    }
+
+    /* role tagline */
+    .role-badge {
+      background: #f5f9fe;
+      margin: 1.5rem 2rem 0 2rem;
+      padding: 0.6rem 1.2rem;
+      border-radius: 40px;
+      display: inline-block;
+      font-size: 0.9rem;
+      color: #0a2f44;
+      font-weight: 500;
+    }
+
+    .dashboard-title {
+      padding: 1rem 2rem 0rem 2rem;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #0a2f44;
+      border-bottom: 3px solid #ffc857;
+      display: inline-block;
+      margin-left: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.8rem;
+      padding: 2rem;
+    }
+
+    .dashboard-card {
+      background: #ffffff;
+      border-radius: 1.5rem;
+      padding: 1.8rem 1rem 1.5rem 1rem;
+      text-align: center;
+      box-shadow: 0 12px 25px -8px rgba(0, 0, 0, 0.08);
+      transition: all 0.25s ease;
+      cursor: pointer;
+      border: 1px solid #e9f0f5;
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.15);
+      border-color: #ffc857;
+    }
+
+    .card-icon {
+      font-size: 2.5rem;
+      color: #0a2f44;
+      background: #eef2fa;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      margin: 0 auto 1rem auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .dashboard-card h3 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #1e2f3e;
+    }
+
+    .dashboard-card p {
+      font-size: 0.85rem;
+      color: #5f7f9a;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      border-top: 1px solid #eef2f7;
+      font-size: 0.75rem;
+      color: #4a627a;
+    }
+
+    @media (max-width: 650px) {
+      .cards-grid {
+        grid-template-columns: 1fr;
+        padding: 1.5rem;
+      }
+      .dashboard-header {
+        flex-direction: column;
+        text-align: center;
+      }
+      .dashboard-title {
+        font-size: 1.4rem;
+        margin-left: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="dashboard-wrapper">
+  <div class="dashboard-header">
+    <div class="brand">
+      <i class="fas fa-comments"></i>
+      <span>Kabianga Comm Hub</span>
+    </div>
+    <div class="user-info">
+      <i class="fas fa-user-circle"></i>
+      <span id="dashboardUserName">User</span>
+      <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </div>
+  <div id="dynamicDashboardContent"></div>
+  <footer>© 2025 University of Kabianga · Connecting Students, Lecturers, and Administration</footer>
+</div>
+
+<script>
+  // ---------- Session handling (role-based access control) ----------
+  function getSession() {
+    let session = localStorage.getItem('commHubSession');
+    if (!session) session = sessionStorage.getItem('commHubSession');
+    if (!session) return null;
+    try {
+      return JSON.parse(session);
+    } catch(e) { return null; }
+  }
+
+  function clearSessionAndRedirect() {
+    localStorage.removeItem('commHubSession');
+    sessionStorage.removeItem('commHubSession');
+    window.location.href = 'login.html';
+  }
+
+  // ---------- Dashboard card data per role (matching the design) ----------
+  const roleCards = {
+    student: [
+      { icon: "fas fa-book-open", title: "MY COURSES", desc: "View enrolled courses & syllabus", actionMsg: "📚 Your Courses: Web Development, Database Systems, Communication Skills, Calculus." },
+      { icon: "fas fa-envelope", title: "MESSAGES", desc: "Inbox & lecturer replies", actionMsg: "💬 You have 3 new messages. Latest: Assignment deadline extended." },
+      { icon: "fas fa-bullhorn", title: "ANNOUNCEMENTS", desc: "Campus & department news", actionMsg: "📢 University Announcement: Library hours extended during exams." },
+      { icon: "fas fa-chart-line", title: "GRADES", desc: "Academic performance", actionMsg: "🎓 Semester Results: Web Dev A-, Database B+, Maths A. CGPA: 3.6" }
+    ],
+    lecturer: [
+      { icon: "fas fa-chalkboard-user", title: "MY CLASSES", desc: "Courses & attendance", actionMsg: "📖 Your Classes: CS101 (Web Dev), CS205 (Databases), CS301 (Project). 45 students enrolled." },
+      { icon: "fas fa-question-circle", title: "STUDENT QUERIES", desc: "Pending questions", actionMsg: "❓ 12 pending queries from students. Reply to clear doubts." },
+      { icon: "fas fa-upload", title: "UPLOAD RESOURCES", desc: "Share notes & assignments", actionMsg: "📎 Upload feature: Share PDFs, video lectures & reading materials." },
+      { icon: "fas fa-chart-simple", title: "ANALYTICS", desc: "Performance insights", actionMsg: "📊 Class average: 74% | Top performer: A. Mwangi | Assignment submission rate: 92%" }
+    ],
+    admin: [
+      { icon: "fas fa-users-gear", title: "USER MANAGEMENT", desc: "Manage students & lecturers", actionMsg: "👥 Admin Console: Add/remove users, reset passwords, assign roles. (Demo: full control panel)" },
+      { icon: "fas fa-bell", title: "SYSTEM ALERTS", desc: "Monitor critical alerts", actionMsg: "⚠️ System Health: All services online. 2 pending server logs. Disk usage: 48%" },
+      { icon: "fas fa-globe", title: "CAMPUS-WIDE COMMS", desc: "Broadcast announcements", actionMsg: "📢 Broadcast to 2,450 users: Send emergency notices, events & news." },
+      { icon: "fas fa-chart-pie", title: "REPORTS", desc: "Activity & analytics", actionMsg: "📈 Monthly Report: 1240 logins, 350 messages exchanged, 98 resource uploads." }
+    ]
+  };
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  function generateDashboardHTML(role, userName) {
+    const cards = roleCards[role];
+    if (!cards) return '<div class="error-msg">Invalid role. Please login again.</div>';
+
+    const cardsHTML = cards.map(card => `
+      <div class="dashboard-card" data-action-msg="${card.actionMsg.replace(/"/g, '&quot;')}" data-title="${card.title}">
+        <div class="card-icon"><i class="${card.icon}"></i></div>
+        <h3>${card.title}</h3>
+        <p>${card.desc}</p>
+      </div>
+    `).join('');
+
+    let roleDisplay = '';
+    if (role === 'student') roleDisplay = 'STUDENT DASHBOARD';
+    else if (role === 'lecturer') roleDisplay = 'LECTURER DASHBOARD';
+    else roleDisplay = 'ADMIN DASHBOARD';
+
+    return `
+      <div>
+        <div class="role-badge">
+          <i class="fas fa-graduation-cap"></i> Logged in as <strong>${escapeHtml(userName)}</strong> · ${role.toUpperCase()} access
+        </div>
+        <div class="dashboard-title">
+          <i class="fas fa-tachometer-alt"></i> ${roleDisplay}
+        </div>
+        <div class="cards-grid">
+          ${cardsHTML}
+        </div>
+      </div>
+    `;
+  }
+
+  function bindCardClicks() {
+    const cards = document.querySelectorAll('.dashboard-card');
+    cards.forEach(card => {
+      card.removeEventListener('click', handleCardClick);
+      card.addEventListener('click', handleCardClick);
+    });
+  }
+
+  function handleCardClick(e) {
+    const card = e.currentTarget;
+    const actionMsg = card.getAttribute('data-action-msg');
+    const title = card.getAttribute('data-title');
+    alert(`📌 ${title}\n\n${actionMsg}`);
+  }
+
+  function loadDashboard() {
+    const session = getSession();
+    if (!session || !session.role) {
+      clearSessionAndRedirect();
+      return;
+    }
+
+    const container = document.getElementById('dynamicDashboardContent');
+    container.innerHTML = generateDashboardHTML(session.role, session.fullName);
+    document.getElementById('dashboardUserName').innerText = session.fullName || session.username;
+    bindCardClicks();
+  }
+
+  // Logout
+  document.getElementById('logoutBtn').addEventListener('click', clearSessionAndRedirect);
+
+  // Initial load
+  loadDashboard();
+</script>
+</body>
+</html>

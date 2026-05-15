@@ -1,0 +1,48 @@
+const express = require('express');
+const cors = require('cors');
+const app = express();
+const PORT = 5000;
+
+// Basic middleware
+app.use(cors());
+app.use(express.json());
+
+// Simple test route
+app.get('/', (req, res) => {
+    res.json({ message: 'Backend is running!' });
+});
+
+// Login route
+app.post('/api/login', (req, res) => {
+    const { email, password } = req.body;
+    console.log('Login attempt:', email);
+    
+    // Test users
+    const users = {
+        'admin@test.com': { password: 'admin123', role: 'admin', name: 'Admin' },
+        'user@test.com': { password: 'user123', role: 'user', name: 'User' }
+    };
+    
+    const user = users[email];
+    
+    if (user && user.password === password) {
+        res.json({
+            success: true,
+            role: user.role,
+            redirectUrl: /dashboard/${user.role},
+            message: 'Login successful'
+        });
+    } else {
+        res.status(401).json({
+            success: false,
+            message: 'Invalid email or password'
+        });
+    }
+});
+
+// Start server
+app.listen(PORT, () => {
+    console.log(✅ Server running on http://localhost:${PORT});
+    console.log(🔑 Test login: admin@test.com / admin123);
+    console.log(📝 Use: POST to http://localhost:${PORT}/api/login);
+});

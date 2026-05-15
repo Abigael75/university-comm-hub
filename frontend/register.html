@@ -1,0 +1,246 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - University Comm Hub</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h2 { text-align: center; margin-bottom: 30px; color: #333; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .login-link { text-align: center; margin-top: 20px; }
+        .login-link a { color: #667eea; text-decoration: none; }
+        .error { color: #e74c3c; text-align: center; margin-top: 10px; padding: 10px; background: #fef0ef; border-radius: 8px; }
+        .success { color: #27ae60; text-align: center; margin-top: 10px; padding: 10px; background: #e8f5e9; border-radius: 8px; }
+        .info-text { font-size: 12px; color: #666; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>📝 Create New Account</h2>
+        
+        <form id="registerForm">
+            <div class="form-group">
+                <label>Full Name *</label>
+                <input type="text" id="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Email *</label>
+                <input type="email" id="email" required>
+                <div class="info-text">Use your University of Kabianga email (@kabianga.ac.ke or @students.kabianga.ac.ke)</div>
+            </div>
+            
+            <div class="form-group">
+                <label>Role *</label>
+                <select id="role" onchange="toggleRoleFields()">
+                    <option value="student">Student</option>
+                    <option value="lecturer">Lecturer</option>
+                </select>
+            </div>
+            
+            <div class="form-group" id="studentIdGroup">
+                <label>Student ID / Registration Number</label>
+                <input type="text" id="studentId" placeholder="e.g., COM/001/2024">
+            </div>
+            
+            <div class="form-group" id="staffIdGroup" style="display:none;">
+                <label>Staff ID</label>
+                <input type="text" id="staffId" placeholder="e.g., STAFF/001">
+            </div>
+            
+            <div class="form-group">
+                <label>Department</label>
+                <select id="department">
+                    <option>Computer Science</option>
+                    <option>Information Technology</option>
+                    <option>Business</option>
+                    <option>Engineering</option>
+                    <option>Education</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Password *</label>
+                <input type="password" id="password" required>
+                <div class="info-text">Minimum 6 characters</div>
+            </div>
+            
+            <div class="form-group">
+                <label>Confirm Password *</label>
+                <input type="password" id="confirmPassword" required>
+            </div>
+            
+            <button type="submit">Create Account</button>
+        </form>
+        
+        <div id="message"></div>
+        
+        <div class="login-link">
+            Already have an account? <a href="/index.html">Login here</a>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3001';
+        
+        // Email validation function - only allows University of Kabianga emails
+        function validateEmail(email) {
+            const allowedDomains = ['@kabianga.ac.ke', '@students.kabianga.ac.ke'];
+            return allowedDomains.some(domain => email.toLowerCase().endsWith(domain));
+        }
+        
+        function toggleRoleFields() {
+            const role = document.getElementById('role').value;
+            document.getElementById('studentIdGroup').style.display = role === 'student' ? 'block' : 'none';
+            document.getElementById('staffIdGroup').style.display = role === 'lecturer' ? 'block' : 'none';
+        }
+        
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            const messageDiv = document.getElementById('message');
+            
+            // Clear previous messages
+            messageDiv.innerHTML = '';
+            
+            // Validate name
+            if (!name || name.trim() === '') {
+                messageDiv.innerHTML = '<div class="error">❌ Please enter your full name!</div>';
+                return;
+            }
+            
+            // Validate email domain (University of Kabianga only)
+            if (!validateEmail(email)) {
+                messageDiv.innerHTML = '<div class="error">❌ Please use your University of Kabianga email address (@kabianga.ac.ke or @students.kabianga.ac.ke)!</div>';
+                return;
+            }
+            
+            // Validate password match
+            if (password !== confirm) {
+                messageDiv.innerHTML = '<div class="error">❌ Passwords do not match!</div>';
+                return;
+            }
+            
+            // Validate password length
+            if (password.length < 6) {
+                messageDiv.innerHTML = '<div class="error">❌ Password must be at least 6 characters!</div>';
+                return;
+            }
+            
+            const role = document.getElementById('role').value;
+            const formData = {
+                name: name.trim(),
+                email: email.toLowerCase().trim(),
+                password: password,
+                confirmPassword: confirm,
+                role: role,
+                department: document.getElementById('department').value
+            };
+            
+            if (role === 'student') {
+                const studentId = document.getElementById('studentId').value;
+                if (!studentId) {
+                    messageDiv.innerHTML = '<div class="error">❌ Please enter your Student ID!</div>';
+                    return;
+                }
+                formData.studentId = studentId;
+            } else {
+                const staffId = document.getElementById('staffId').value;
+                if (!staffId) {
+                    messageDiv.innerHTML = '<div class="error">❌ Please enter your Staff ID!</div>';
+                    return;
+                }
+                formData.staffId = staffId;
+            }
+            
+            const submitBtn = document.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Creating Account...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                // AUTO-LOGIN AFTER REGISTRATION
+                if (result.success) {
+                    // Store user data for auto-login
+                    localStorage.setItem('token', result.token);
+                    localStorage.setItem('role', result.role);
+                    localStorage.setItem('user', JSON.stringify(result.user));
+                    
+                    messageDiv.innerHTML = '<div class="success">✅ Registration successful! Redirecting to dashboard...</div>';
+                    
+                    // Redirect to role-specific dashboard after 2 seconds
+                    setTimeout(() => {
+                        window.location.href =` /dashboard/${result.role}.html`;
+                    }, 2000);
+                } else {
+                    messageDiv.innerHTML = `<div class="error">❌ ${result.message}</div>`;
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                messageDiv.innerHTML = '<div class="error">❌ Cannot connect to server. Please make sure backend is running on port 3001.</div>';
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+        
+        // Initialize role fields on page load
+        toggleRoleFields();
+    </script>
+</body>
+</html>

@@ -1,0 +1,240 @@
+﻿
+// ============================================
+// ENHANCED REGISTRATION WITH VALIDATION
+// ============================================
+app.post('/api/auth/register', async (req, res) => {
+    try {
+        const { 
+            name, email, password, confirmPassword, role, 
+            studentId, staffId, department, faculty, 
+            yearOfStudy, phoneNumber, alternativeEmail 
+        } = req.body;
+        
+        // Validate required fields
+        if (!name || !email || !password) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Name, email and password are required' 
+            });
+        }
+        
+        // Validate password match
+        if (password !== confirmPassword) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Passwords do not match' 
+            });
+        }
+        
+        // Validate password strength
+        if (password.length < 6) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Password must be at least 6 characters' 
+            });
+        }
+        
+        // Check if user exists
+        const existingUser = await User.findOne({ where: { email } });
+        if (existingUser) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Email already registered' 
+            });
+        }
+        
+        // Create user
+        const user = await User.create({
+            name,
+            email: email.toLowerCase(),
+            password,
+            role: role || 'student',
+            studentId: role === 'student' ? studentId : null,
+            staffId: role === 'lecturer' ? staffId : null,
+            department,
+            faculty,
+            yearOfStudy: yearOfStudy ? parseInt(yearOfStudy) : null,
+            phoneNumber,
+            alternativeEmail
+        });
+        
+        // Generate token
+        const token = jwt.sign(
+            { id: user.id, email: user.email, role: user.role, name: user.name },
+            JWT_SECRET,
+            { expiresIn: '7d' }
+        );
+        
+        // Create backup after successful registration
+        const backupManager = require('./utils/backup');
+        backupManager.createBackup().catch(console.error);
+        
+        console.log(✅ New user registered:  ());
+        
+        res.status(201).json({
+            success: true,
+            token,
+            role: user.role,
+            redirectUrl: '/dashboard/' + user.role,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            },
+            message: 'Registration successful!'
+        });
+    } catch (error) {
+        console.error('Registration error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Server error: ' + error.message 
+        });
+    }
+});
+
+// ============================================
+// GET USER PROFILE
+// ============================================
+app.get('/api/user/profile', async (req, res) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+        return res.status(401).json({ success: false, message: 'No token provided' });
+    }
+    
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const user = await User.findByPk(decoded.id, {
+            attributes: { exclude: ['password'] }
+        });
+        
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        
+        res.json({ success: true, user });
+    } catch (error) {
+        res.status(401).json({ success: false, message: 'Invalid token' });
+    }
+});
+
+// ============================================
+// UPDATE USER PROFILE
+// ============================================
+app.put('/api/user/profile', async (req, res) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+        return res.status(401).json({ success: false, message: 'No token provided' });
+    }
+    
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const user = await User.findByPk(decoded.id);
+        
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+        
+        // Update allowed fields
+        const allowedUpdates = ['name', 'phoneNumber', 'department', 'faculty'];
+        allowedUpdates.forEach(field => {
+            if (req.body[field] !== undefined) {
+                user[field] = req.body[field];
+            }
+        });
+        
+        await user.save();
+        
+        res.json({ 
+            success: true, 
+            message: 'Profile updated successfully',
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                phoneNumber: user.phoneNumber,
+                department: user.department,
+                faculty: user.faculty
+            }
+        });
+    } catch (error) {
+        res.status(401).json({ success: false, message: 'Invalid token' });
+    }
+});
+
+// ============================================
+// BACKUP ENDPOINTS (Admin only)
+// ============================================
+const backupManager = require('./utils/backup');
+
+// Create manual backup
+app.post('/api/admin/backup', async (req, res) => {
+    try {
+        const backupFile = await backupManager.createBackup();
+        res.json({ success: true, backupFile, message: 'Backup created successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// List all backups
+app.get('/api/admin/backups', (req, res) => {
+    try {
+        const backups = backupManager.listBackups();
+        res.json({ success: true, backups });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Restore from backup
+app.post('/api/admin/restore/:filename', async (req, res) => {
+    try {
+        const backupPath = path.join(__dirname, 'backups', req.params.filename);
+        const success = await backupManager.restoreBackup(backupPath);
+        
+        if (success) {
+            res.json({ success: true, message: 'Restore completed successfully' });
+        } else {
+            res.status(500).json({ success: false, message: 'Restore failed' });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Export to CSV
+app.get('/api/admin/export-csv', async (req, res) => {
+    try {
+        const csvFile = await backupManager.exportToCSV();
+        res.download(csvFile);
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Get system stats
+app.get('/api/admin/stats', async (req, res) => {
+    try {
+        const totalUsers = await User.count();
+        const students = await User.count({ where: { role: 'student' } });
+        const lecturers = await User.count({ where: { role: 'lecturer' } });
+        const admins = await User.count({ where: { role: 'admin' } });
+        
+        res.json({
+            success: true,
+            stats: {
+                totalUsers,
+                students,
+                lecturers,
+                admins,
+                lastBackup: backupManager.listBackups()[0]?.modified || null
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});

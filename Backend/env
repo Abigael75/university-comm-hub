@@ -1,0 +1,15 @@
+# Server Configuration
+PORT=3001
+JWT_SECRET=your-super-secret-key-change-this-in-production
+
+# MySQL Database Configuration
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=university_comm_hub
+DB_USER=root
+DB_PASSWORD=41536004Achep@
+
+# Alternative for XAMPP/WAMP users:
+# DB_HOST=127.0.0.1
+# DB_USER=root
+# DB_PASSWORD=41536004Achep@

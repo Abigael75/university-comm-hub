@@ -1,0 +1,188 @@
+UNIVERSITY COMM HUB - Project Proposal
+
+ Project Overview
+
+University Comm Hub is a centralized communication platform designed for University of Kabianga that connects students, lecturers, and administrators through a single web-based application with role-based access control.
+
+
+ Core Objectives
+
+· Provide a unified communication platform for the university community
+· Enable role-specific dashboards with tailored features
+· Streamline information flow between students, lecturers, and admin
+· Reduce communication gaps and improve campus collaboration
+
+
+ User Roles & Access Levels
+
+1. STUDENT Dashboard
+
+Access Level: Read & Interact
+
+Feature Description
+ My Courses View enrolled courses, schedules, and instructors
+ Messages Send/receive messages to/from lecturers
+ Announcements View campus-wide and course-specific announcements
+ Grades Check grades, GPA, and academic progress
+ Resources Download learning materials from lecturers
+
+2. LECTURER Dashboard
+
+Access Level: Create, Manage & Respond
+
+Feature Description
+ My Classes View assigned courses, schedules, and student enrollment
+ Student Queries Respond to student questions and concerns
+ Upload Resources Share learning materials, slides, and assignments
+ Analytics View class performance, attendance, and engagement metrics
+
+3. ADMIN Dashboard
+
+Access Level: Full Control (CRUD)
+
+Feature Description
+ User Management Add/edit/remove users, assign roles
+ System Alerts Broadcast maintenance and emergency notifications
+ Campus-Wide Comms Send announcements to all/specific user groups
+ Reports Generate system usage and activity reports
+
+
+ System Architecture
+
+
+┌─────────────────────────────────────────────────────────────┐
+│                    UNIVERSITY COMM HUB                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                               │
+│   ┌─────────┐    ┌─────────┐    ┌─────────┐                │
+│   │ STUDENT │    │LECTURER │    │  ADMIN  │                │
+│   │   PORTAL│    │  PORTAL │    │  PORTAL │                │
+│   └────┬────┘    └────┬────┘    └────┬────┘                │
+│        │              │              │                       │
+│        └──────────────┼──────────────┘                       │
+│                       │                                       │
+│              ┌────────▼────────┐                            │
+│              │  JWT AUTH Layer │                            │
+│              └────────┬────────┘                            │
+│                       │                                       │
+│              ┌────────▼────────┐                            │
+│              │  BACKEND API    │                            │
+│              │   (Node.js)     │                            │
+│              └────────┬────────┘                            │
+│                       │                                       │
+│              ┌────────▼────────┐                            │
+│              │    DATABASE     │                            │
+│              │ (MySQL) │                            │
+│              └─────────────────┘                            │
+└─────────────────────────────────────────────────────────────┘
+
+
+
+ Technical Stack
+
+Component Technology
+Frontend HTML5, CSS3, JavaScript
+Backend Node.js, Express.js
+Authentication JWT (JSON Web Tokens)
+Database  MySQL (planned)
+Server Express Server (Port 3001)
+Static Serving serve package (Port 3000)
+
+ Test Credentials
+
+Role Email Password
+Student student@test.com student123
+Lecturer lecturer@test.com lecturer123
+Admin admin@test.com admin123
+
+
+ Key Features Implemented
+
+It implements:
+
+· ✅ Role-based authentication with JWT
+· ✅ Three distinct dashboards (Student, Lecturer, Admin)
+· ✅ Role-specific navigation menus
+· ✅ Secure login/logout functionality
+· ✅ Session persistence via localStorage
+· ✅ Responsive design for mobile/tablet
+· ✅ Animated UI with role cards
+
+It should implement:
+
+· 🔄 Real-time messaging system
+· 🔄 File upload for resources
+· 🔄 Database integration
+· 🔄 Email notifications
+· 🔄 Course registration system
+· 🔄 Grade submission (lecturer)
+· 🔄 Analytics dashboard enhancement
+
+
+
+
+ System Workflow Diagram
+
+
+┌──────────────────────────────────────────────────────────────────┐
+│                         USER ACCESS FLOW                          │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                    │
+│   START → Landing Page → Select Role → Login → JWT Verification  │
+│                                                                    │
+│                    ┌─────────────┴─────────────┐                 │
+│                    │                           │                 │
+│                    ▼                           ▼                 │
+│            ┌───────────────┐           ┌───────────────┐         │
+│            │  VALID TOKEN? │           │ INVALID TOKEN │         │
+│            └───────┬───────┘           └───────┬───────┘         │
+│                    │                           │                 │
+│                    ▼                           ▼                 │
+│            ┌───────────────┐           ┌───────────────┐         │
+│            │Redirect to    │           │Show Error    │         │
+│            │Role Dashboard │           │& Retry Login │         │
+│            └───────────────┘           └───────────────┘         │
+│                                                                    │
+│    ┌──────────────┴──────────────┐                               │
+│    │              │              │                               │
+│    ▼              ▼              ▼                               │
+│ ┌──────┐    ┌──────────┐    ┌─────────┐                         │
+│ │STUDENT│    │LECTURER │    │  ADMIN  │                         │
+│ │Courses│    │ Classes │    │  Users  │                         │
+│ │Grades │    │ Queries │    │ Alerts  │                         │
+│ │Msgs   │    │Resources│    │ Reports │                         │
+│ └──────┘    └──────────┘    └─────────┘                         │
+│                                                                    │
+└──────────────────────────────────────────────────────────────────┘
+
+
+
+
+ University of Kabianga Specific Features
+
+· Student Portal: Access course materials, submit queries, check grades
+· Lecturer Portal: Manage classes, respond to students, upload resources
+· Admin Portal: Oversee entire system, manage users, broadcast announcements
+· Campus Integration: Designed to match University of Kabianga's academic structure
+
+
+
+ This app facilitates
+1. Improved Communication - Real-time information sharing across campus
+2. Reduced Email Overload - Centralized platform for all communications
+3. Better Resource Management - Easy access to learning materials
+4. Enhanced Transparency - Students can track grades and progress
+5. Efficient Administration - Streamlined user and content management
+
+
+
+ Conclusion
+
+The University Comm Hub successfully implements a role-based communication platform for University of Kabianga with:
+
+· ✅ Secure authentication using JWT
+· ✅ Three distinct dashboards for different user roles
+· ✅ Feature-rich interfaces tailored to each role's needs
+· ✅ Scalable architecture ready for database integration
+
+The prototype demonstrates functional role-based access control with working login systems and role-specific dashboards, providing a solid foundation for full deployment at the University of Kabianga.
