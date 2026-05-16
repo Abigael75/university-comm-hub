@@ -1,0 +1,277 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecturer Dashboard - University Comm Hub</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .sidebar h2 { margin-bottom: 30px; text-align: center; font-size: 1.2em; }
+        .sidebar nav a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 12px;
+            margin: 5px 0;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .sidebar nav a:hover { background: rgba(255,255,255,0.2); }
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .query-item {
+            background: #f9f9f9;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+        .resource-item {
+            background: #f0f0f0;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .class-card {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #11998e;
+        }
+        textarea, input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover { background: #2980b9; }
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; height: auto; position: relative; }
+            .main-content { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>👨‍🏫 LECTURER HUB</h2>
+        <nav>
+            <a href="#" onclick="showSection('classes')">📚 MY CLASSES</a>
+            <a href="#" onclick="showSection('queries')">❓ STUDENT QUERIES</a>
+            <a href="#" onclick="showSection('resources')">📤 UPLOAD RESOURCES</a>
+            <a href="#" onclick="showSection('analytics')">📊 ANALYTICS</a>
+        </nav>
+    </div>
+    <div class="main-content">
+        <div class="header">
+            <h2>Welcome, <span id="userName"></span>!</h2>
+            <button onclick="logout()">Logout</button>
+        </div>
+
+        <div id="classes" class="section">
+            <div class="card">
+                <h3>My Classes</h3>
+                <div id="classesList"></div>
+            </div>
+        </div>
+
+        <div id="queries" class="section" style="display:none;">
+            <div class="card">
+                <h3>Student Queries</h3>
+                <div id="queriesList"></div>
+            </div>
+        </div>
+
+        <div id="resources" class="section" style="display:none;">
+            <div class="card">
+                <h3>Upload Course Resources</h3>
+                <select id="courseSelect">
+                    <option>Computer Science 101 (CS101)</option>
+                    <option>Web Development (WD201)</option>
+                    <option>Database Systems (DB301)</option>
+                </select>
+                <input type="text" id="resourceTitle" placeholder="Resource title">
+                <input type="text" id="resourceDescription" placeholder="Resource description">
+                <button onclick="uploadResource()">📤 Upload Resource</button>
+            </div>
+            <div class="card">
+                <h3>Uploaded Resources</h3>
+                <div id="resourcesList"></div>
+            </div>
+        </div>
+
+        <div id="analytics" class="section" style="display:none;">
+            <div class="card">
+                <h3>Course Analytics</h3>
+                <div id="analyticsData"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3001';
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            window.location.href = '/index.html';
+        }
+        
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        document.getElementById('userName').textContent = user.name || 'Lecturer';
+        
+        const classes = [
+            { name: 'Computer Science 101', code: 'CS101', students: 45, schedule: 'Mon/Wed 10:00 AM' },
+            { name: 'Web Development', code: 'WD201', students: 38, schedule: 'Tue/Thu 2:00 PM' },
+            { name: 'Database Systems', code: 'DB301', students: 42, schedule: 'Fri 9:00 AM' }
+        ];
+        
+        const queries = [
+            { id: 1, student: 'John Doe', course: 'CS101', question: 'Can you explain the assignment requirements?', status: 'Pending' },
+            { id: 2, student: 'Jane Smith', course: 'WD201', question: 'When is the midterm exam?', status: 'Pending' },
+            { id: 3, student: 'Mike Johnson', course: 'DB301', question: 'Could you provide more examples of SQL joins?', status: 'Pending' }
+        ];
+        
+        let resources = [
+            { title: 'Lecture 1 Slides', course: 'CS101', description: 'Introduction to Programming' },
+            { title: 'Assignment 2 Details', course: 'WD201', description: 'Build a responsive website' },
+            { title: 'Database Schema Examples', course: 'DB301', description: 'ER diagrams and schemas' }
+        ];
+        
+        function showSection(section) {
+            document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
+            document.getElementById(section).style.display = 'block';
+            if (section === 'classes') loadClasses();
+            if (section === 'queries') loadQueries();
+            if (section === 'resources') loadResources();
+            if (section === 'analytics') loadAnalytics();
+        }
+        
+        function loadClasses() {
+            document.getElementById('classesList').innerHTML = classes.map(c => `
+                <div class="class-card">
+                    <strong>${c.name} (${c.code})</strong><br>
+                    📅 ${c.schedule}<br>
+                    👥 ${c.students} students enrolled
+                </div>
+            `).join('');
+        }
+        
+        function loadQueries() {
+            document.getElementById('queriesList').innerHTML = queries.map(q => `
+                <div class="query-item">
+                    <strong>${q.student} (${q.course}):</strong> ${q.question}
+                    <br><small>Status: ${q.status}</small>
+                    <br><button onclick="answerQuery('${q.student}', '${q.course}')">✏️ Answer Query</button>
+                </div>
+            `).join('');
+        }
+        
+        function loadResources() {
+            document.getElementById('resourcesList').innerHTML = resources.map(r => `
+                <div class="resource-item">
+                    <div>
+                        <strong>${r.title}</strong><br>
+                        <small>${r.course} - ${r.description}</small>
+                    </div>
+                    <button onclick="deleteResource('${r.title}')">🗑️ Delete</button>
+                </div>
+            `).join('');
+        }
+        
+        function loadAnalytics() {
+            document.getElementById('analyticsData').innerHTML = `
+                <div class="class-card">
+                    <strong>📊 Overall Statistics</strong><br>
+                    Average attendance: 85%<br>
+                    Assignment completion: 78%<br>
+                    Average grade: 82%<br>
+                    Student satisfaction: 4.2/5
+                </div>
+                ${classes.map(c => `
+                    <div class="class-card">
+                        <strong>${c.name} (${c.code})</strong><br>
+                        Attendance: ${Math.floor(Math.random() * 20 + 75)}%<br>
+                        Assignment Avg: ${Math.floor(Math.random() * 20 + 70)}%<br>
+                        Active Students: ${c.students}
+                    </div>
+                `).join('')}
+            `;
+        }
+        
+        function answerQuery(student, course) {
+            const answer = prompt(`Answering ${student}'s query about ${course}:`);
+            if (answer) {
+                alert(`Answer sent to ${student}`);
+            }
+        }
+        
+        function uploadResource() {
+            const course = document.getElementById('courseSelect').value;
+            const title = document.getElementById('resourceTitle').value;
+            const description = document.getElementById('resourceDescription').value;
+            
+            if (title && description) {
+                resources.push({ title, course, description });
+                loadResources();
+                document.getElementById('resourceTitle').value = '';
+                document.getElementById('resourceDescription').value = '';
+                alert(`Resource "${title}" uploaded to ${course}`);
+            } else {
+                alert('Please fill in both title and description');
+            }
+        }
+        
+        function deleteResource(title) {
+            resources = resources.filter(r => r.title !== title);
+            loadResources();
+        }
+        
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/index.html';
+        }
+        
+        loadClasses();
+    </script>
+</body>
+</html>

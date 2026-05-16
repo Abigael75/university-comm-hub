@@ -1,0 +1,589 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#667eea">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Comm Hub - Campus Communication Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+        
+        .bg-animation div {
+            position: absolute;
+            display: block;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            bottom: -150px;
+            animation: floatUp 15s infinite;
+        }
+        
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            color: white;
+            animation: fadeInDown 0.8s ease;
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+        
+        .role-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+            animation: fadeInUp 0.8s ease;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .role-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .role-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .role-card:hover::before {
+            left: 100%;
+        }
+        
+        .role-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+        
+        .role-card:active {
+            transform: translateY(-5px);
+        }
+        
+        .role-card h2 {
+            color: #333;
+            margin: 20px 0 10px;
+            font-size: 1.8em;
+        }
+        
+        .role-card p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .role-icon {
+            font-size: 4.5em;
+            margin-bottom: 10px;
+        }
+        
+        .student { 
+            border-top: 5px solid #3498db;
+            background: linear-gradient(135deg, #fff 0%, #f0f9ff 100%);
+        }
+        
+        .lecturer { 
+            border-top: 5px solid #2ecc71;
+            background: linear-gradient(135deg, #fff 0%, #f0fff4 100%);
+        }
+        
+        .admin { 
+            border-top: 5px solid #e74c3c;
+            background: linear-gradient(135deg, #fff 0%, #fff0f0 100%);
+        }
+        
+        .feature-list {
+            text-align: left;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .feature-list span {
+            display: block;
+            padding: 5px 0;
+            color: #555;
+            font-size: 0.9em;
+        }
+        
+        .feature-list span::before {
+            content: '✓ ';
+            color: #27ae60;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .login-form {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 450px;
+            margin: 40px auto;
+            display: none;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: fadeInUp 0.5s ease;
+        }
+        
+        .login-form.active {
+            display: block;
+        }
+        
+        .login-form h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 1.8em;
+        }
+        
+        .login-form h2 span {
+            color: #667eea;
+            text-transform: uppercase;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .back-btn {
+            background: #95a5a6;
+            margin-top: 10px;
+        }
+        
+        .back-btn:hover {
+            background: #7f8c8d;
+            box-shadow: 0 5px 20px rgba(149, 165, 166, 0.4);
+        }
+        
+        .error {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            background: #fef0ef;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 40px 20px 20px;
+            color: white;
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .role-cards {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .role-card {
+                padding: 30px 20px;
+            }
+            
+            .login-form {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+        }
+        
+        /* Loading spinner */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation" id="bgAnimation"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🏫 UNIVERSITY COMM HUB</h1>
+            <p>Centralized Communication Platform for Campus Community</p>
+        </div>
+        
+        <div id="roleSelection">
+            <!-- Add registration link -->
+<div style="text-align: center; margin-top: 20px;">
+    <a href="/register.html" style="color: white;">New user? Register here</a>
+</div>
+            <div class="role-cards">
+                <div class="role-card student" onclick="showLogin('student')">
+                    <div class="role-icon">👨‍🎓</div>
+                    <h2>STUDENT</h2>
+                    <p>Access courses, grades, and announcements</p>
+                    <div class="feature-list">
+                        <span>View enrolled courses</span>
+                        <span>Check grades & progress</span>
+                        <span>Receive announcements</span>
+                        <span>Send messages to lecturers</span>
+                    </div>
+                </div>
+                
+                <div class="role-card lecturer" onclick="showLogin('lecturer')">
+                    <div class="role-icon">👨‍🏫</div>
+                    <h2>LECTURER</h2>
+                    <p>Manage classes, upload resources, view analytics</p>
+                    <div class="feature-list">
+                        <span>Manage course materials</span>
+                        <span>Answer student queries</span>
+                        <span>Upload learning resources</span>
+                        <span>View class analytics</span>
+                    </div>
+                </div>
+                
+                <div class="role-card admin" onclick="showLogin('admin')">
+                    <div class="role-icon">👑</div>
+                    <h2>ADMIN</h2>
+                    <p>System management and campus-wide communications</p>
+                    <div class="feature-list">
+                        <span>User management</span>
+                        <span>System alerts & monitoring</span>
+                        <span>Campus-wide announcements</span>
+                        <span>Generate reports</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loginForm" class="login-form">
+            <h2>Login as <span id="roleName"></span></h2>
+            <form onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label>📧 Email Address</label>
+                    <input type="email" id="email" placeholder="Enter your email" required>
+                </div>
+                <div class="input-group">
+                    <label>🔒 Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" id="loginBtn">Login</button>
+                <button type="button" class="back-btn" onclick="backToRoles()">← Back to Roles</button>
+            </form>
+            <div id="loginError" class="error"></div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2024 University Comm Hub | Connecting Campus Community</p>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3001';
+        let selectedRole = '';
+        
+        // Create floating background animation
+        function createBackgroundAnimation() {
+            const bgDiv = document.getElementById('bgAnimation');
+            for (let i = 0; i < 50; i++) {
+                const div = document.createElement('div');
+                const size = Math.random() * 30 + 10;
+                div.style.width = size + 'px';
+                div.style.height = size + 'px';
+                div.style.left = Math.random() * 100 + '%';
+                div.style.animationDelay = Math.random() * 20 + 's';
+                div.style.animationDuration = Math.random() * 10 + 10 + 's';
+                bgDiv.appendChild(div);
+            }
+        }
+        
+        function showLogin(role) {
+            selectedRole = role;
+            document.getElementById('roleSelection').style.display = 'none';
+            document.getElementById('loginForm').classList.add('active');
+            document.getElementById('roleName').textContent = role.toUpperCase();
+            
+            // Set demo credentials based on role
+            if (role === 'student') {
+                document.getElementById('email').value = 'student@test.com';
+                document.getElementById('password').value = 'student123';
+            } else if (role === 'lecturer') {
+                document.getElementById('email').value = 'lecturer@test.com';
+                document.getElementById('password').value = 'lecturer123';
+            } else if (role === 'admin') {
+                document.getElementById('email').value = 'admin@test.com';
+                document.getElementById('password').value = 'admin123';
+            }
+            
+            // Add animation to form
+            document.getElementById('loginForm').style.animation = 'none';
+            setTimeout(() => {
+                document.getElementById('loginForm').style.animation = 'fadeInUp 0.5s ease';
+            }, 10);
+        }
+        
+        function backToRoles() {
+            selectedRole = '';
+            document.getElementById('roleSelection').style.display = 'block';
+            document.getElementById('loginForm').classList.remove('active');
+            document.getElementById('loginError').textContent = '';
+            
+            // Clear form
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
+        }
+        
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('loginError');
+            const loginBtn = document.getElementById('loginBtn');
+            
+            errorDiv.textContent = '';
+            
+            // Show loading state
+            const originalText = loginBtn.textContent;
+            loginBtn.textContent = 'Logging in...';
+            loginBtn.disabled = true;
+            
+            try {
+                const response = await fetch(`${API_URL}/api/login`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Store user data
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('role', data.role);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    
+                    // Show success message
+                    errorDiv.style.color = '#27ae60';
+                    errorDiv.textContent = 'Login successful! Redirecting...';
+                    
+                    // Redirect to role-specific dashboard
+                    setTimeout(() => {
+                        if (data.role === 'student') {
+                            window.location.href = '/dashboard/student.html';
+                        } else if (data.role === 'lecturer') {
+                            window.location.href = '/dashboard/lecturer.html';
+                        } else if (data.role === 'admin') {
+                            window.location.href = '/dashboard/admin.html';
+                        } else {
+                            window.location.href = '/dashboard/student.html';
+                        }
+                    }, 1000);
+                } else {
+                    errorDiv.style.color = '#e74c3c';
+                    errorDiv.textContent = data.message || 'Invalid credentials. Please try again.';
+                    loginBtn.textContent = originalText;
+                    loginBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                errorDiv.style.color = '#e74c3c';
+                errorDiv.textContent = 'Cannot connect to server. Make sure backend is running on port 3001';
+                loginBtn.textContent = originalText;
+                loginBtn.disabled = false;
+            }
+        }
+        
+        // Check if already logged in
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+        if (token && role) {
+            // Redirect to appropriate dashboard
+            if (role === 'student') window.location.href = '/dashboard/student.html';
+            else if (role === 'lecturer') window.location.href = '/dashboard/lecturer.html';
+            else if (role === 'admin') window.location.href = '/dashboard/admin.html';
+        }
+        
+        // Initialize background animation
+        createBackgroundAnimation();
+        
+        // Add keyboard support (Enter key)
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleLogin(e);
+            }
+        });
+    </script>
+    <!-- PWA Service Worker Registration -->
+    <script>
+        // Register Service Worker for offline caching
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                        console.log('✅ Service Worker registered successfully:', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('❌ Service Worker registration failed:', error);
+                    });
+            });
+        }
+        
+        // PWA Install Prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Optional: Show install button
+            console.log('PWA install prompt available');
+        });
+        
+        // Check if app is installed
+        window.addEventListener('appinstalled', function() {
+            console.log('✅ App was installed');
+            deferredPrompt = null;
+        });
+    </script>
+</body>
+</html>

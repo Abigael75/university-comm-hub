@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Kabianga Comm Hub | Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #eef2f7 0%, #d9e2ec 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .login-card {
+      background: white;
+      border-radius: 2rem;
+      box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+      max-width: 500px;
+      width: 100%;
+      margin: 2rem auto;
+    }
+
+    .login-header {
+      background: #0a2f44;
+      padding: 2rem 2rem 1.5rem;
+      text-align: center;
+      color: white;
+    }
+
+    .login-header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+    }
+
+    .login-header h1 i {
+      margin-right: 10px;
+      color: #ffc857;
+    }
+
+    .login-header p {
+      font-size: 0.9rem;
+      opacity: 0.85;
+      margin-top: 0.5rem;
+    }
+
+    .login-body {
+      padding: 2rem;
+    }
+
+    .input-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .input-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #1e2f3e;
+    }
+
+    .input-group i {
+      margin-right: 8px;
+      color: #0a2f44;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      border: 1px solid #cfdfed;
+      border-radius: 1rem;
+      font-size: 1rem;
+      transition: all 0.2s;
+      background: #fefefe;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: #0a2f44;
+      box-shadow: 0 0 0 3px rgba(10, 47, 68, 0.2);
+    }
+
+    .flex-options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 1rem 0 1.8rem;
+      font-size: 0.85rem;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      color: #2c3e50;
+    }
+
+    .forgot-link {
+      color: #0a2f44;
+      text-decoration: none;
+      font-weight: 500;
+      border-bottom: 1px dashed #9aaebf;
+    }
+
+    .forgot-link:hover {
+      color: #ff8c42;
+    }
+
+    .signin-btn {
+      background: #0a2f44;
+      width: 100%;
+      padding: 0.9rem;
+      border: none;
+      border-radius: 2rem;
+      color: white;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .signin-btn:hover {
+      background: #144e6b;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+    }
+
+    .error-msg {
+      background: #ffe6e5;
+      color: #b91c1c;
+      padding: 0.7rem;
+      border-radius: 1rem;
+      margin-top: 1rem;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.75rem;
+      color: #4a627a;
+    }
+  </style>
+</head>
+<body>
+<div class="login-card">
+  <div class="login-header">
+    <h1><i class="fas fa-university"></i> UNIVERSITY OF KABIANGA</h1>
+    <p>Communication Hub · Secure Access</p>
+  </div>
+  <div class="login-body">
+    <div class="input-group">
+      <label><i class="fas fa-id-card"></i> Username / Registration No.</label>
+      <input type="text" id="loginUsername" placeholder="Enter your ID or username" autocomplete="off">
+    </div>
+    <div class="input-group">
+      <label><i class="fas fa-lock"></i> Password</label>
+      <input type="password" id="loginPassword" placeholder="Password">
+    </div>
+    <div class="flex-options">
+      <label class="checkbox-label">
+        <input type="checkbox" id="rememberMeCheckbox"> <span>Remember me</span>
+      </label>
+      <a href="#" id="forgotPwdLink" class="forgot-link">Forgot Password?</a>
+    </div>
+    <button class="signin-btn" id="signinBtn"><i class="fas fa-arrow-right-to-bracket"></i> SIGN IN</button>
+    <div id="loginError" class="error-msg" style="display: none;"></div>
+    <div style="text-align: center; margin-top: 15px;">
+    <a href="/register.html" style="color: #667eea;">Don't have an account? Register here</a>
+</div>
+  </div>
+  <footer>🔐 Connecting Students, Lecturers, and Administration</footer>
+</div>
+
+<script>
+  const VALID_USERS = [
+    { username: "S001", password: "student", role: "student", fullName: "Alex Mwangi (Student)" },
+    { username: "S002", password: "student", role: "student", fullName: "Jane Atieno (Student)" },
+    { username: "L001", password: "lecturer", role: "lecturer", fullName: "Dr. Otieno (Lecturer)" },
+    { username: "L002", password: "lecturer", role: "lecturer", fullName: "Prof. Wanjiku (Lecturer)" },
+    { username: "A001", password: "admin", role: "admin", fullName: "Admin Kabianga" }
+  ];
+
+  function authenticateUser(username, password) {
+    return VALID_USERS.find(user => user.username === username && user.password === password);
+  }
+
+  function handleLogin() {
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errorDiv = document.getElementById('loginError');
+    errorDiv.style.display = 'none';
+
+    if (!username || !password) {
+      errorDiv.innerText = '❌ Please enter Username and Password.';
+      errorDiv.style.display = 'block';
+      return;
+    }
+
+    const user = authenticateUser(username, password);
+    if (!user) {
+      errorDiv.innerText = '❌ Invalid credentials. Use S001/student, L001/lecturer, A001/admin';
+      errorDiv.style.display = 'block';
+      return;
+    }
+    const sessionData = {
+      username: user.username,
+      role: user.role,
+      fullName: user.fullName
+    };
+
+    const remember = document.getElementById('rememberMeCheckbox').checked;
+    if (remember) {
+      localStorage.setItem('commHubSession', JSON.stringify(sessionData));
+      localStorage.setItem('remUsername', username);
+    } else {
+      sessionStorage.setItem('commHubSession', JSON.stringify(sessionData));
+      localStorage.removeItem('remUsername');
+    }
+    window.location.href = 'dashboard.html';
+  }
+  const savedUsername = localStorage.getItem('remUsername');
+  if (savedUsername) {
+    document.getElementById('loginUsername').value = savedUsername;
+    document.getElementById('rememberMeCheckbox').checked = true;
+  }
+  document.getElementById('signinBtn').addEventListener('click', handleLogin);
+  document.getElementById('forgotPwdLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    alert("📞 Forgot password? Contact IT support: support@kabianga.ac.ke");
+  });
+  const pwdField = document.getElementById('loginPassword');
+  pwdField.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleLogin();
+  });
+</script>
+<script src="/js/graphql.js"></script>
+<script>
+const API_URL = 'http://localhost:3001';
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  try {
+    const response = await fetch('${API_URL}/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: e.target.email.value,
+        password: e.target.password.value
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      localStorage.setItem('role', data.role);
+      window.location.href = data.redirectUrl;
+    } else {
+      alert(data.message);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Cannot connect to backend. Is it running on port 3001?');
+  }
+});
+</script>
+</body>
+</html>

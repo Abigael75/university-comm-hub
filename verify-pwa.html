@@ -1,0 +1,254 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Feature Verification - University Comm Hub</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 { text-align: center; color: #333; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; }
+        .status-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+        .status-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        .badge-success { background: #27ae60; color: white; }
+        .badge-error { background: #e74c3c; color: white; }
+        .badge-warning { background: #f39c12; color: white; }
+        .badge-info { background: #3498db; color: white; }
+        .success { border-left-color: #27ae60; background: #e8f5e9; }
+        .error { border-left-color: #e74c3c; background: #fef0ef; }
+        .warning { border-left-color: #f39c12; background: #fef9e7; }
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .button:hover { transform: translateY(-2px); }
+        .details { margin-top: 10px; padding-left: 20px; color: #555; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 PWA Feature Verification</h1>
+        <div class="subtitle">University Comm Hub - Technical Status</div>
+
+        <div id="offline-card" class="status-card">
+            <div class="status-title">
+                <span>📱 Offline Caching (PWA)</span>
+                <span id="offline-badge" class="badge">Checking...</span>
+            </div>
+            <div id="offline-details" class="details"></div>
+        </div>
+
+        <div id="react-card" class="status-card">
+            <div class="status-title">
+                <span>⚛️ React Framework</span>
+                <span id="react-badge" class="badge">Checking...</span>
+            </div>
+            <div id="react-details" class="details"></div>
+        </div>
+
+        <div id="vue-card" class="status-card">
+            <div class="status-title">
+                <span>💚 Vue.js Framework</span>
+                <span id="vue-badge" class="badge">Checking...</span>
+            </div>
+            <div id="vue-details" class="details"></div>
+        </div>
+
+        <div id="push-card" class="status-card">
+            <div class="status-title">
+                <span>🔔 Push Notifications</span>
+                <span id="push-badge" class="badge">Checking...</span>
+            </div>
+            <div id="push-details" class="details"></div>
+        </div>
+
+        <button class="button" onclick="location.reload()">🔄 Refresh Tests</button>
+        <button class="button" id="notifyBtn" style="background: #e74c3c;">🔔 Test Notification</button>
+    </div>
+
+    <script>
+        // Run tests immediately
+        (function() {
+            checkOfflineCaching();
+            checkReact();
+            checkVue();
+            checkPushNotifications();
+        })();
+
+        function checkOfflineCaching() {
+            const badge = document.getElementById('offline-badge');
+            const details = document.getElementById('offline-details');
+            const card = document.getElementById('offline-card');
+            
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    if (registrations.length > 0) {
+                        badge.textContent = 'WORKING';
+                        badge.className = 'badge badge-success';
+                        card.className = 'status-card success';
+                        details.innerHTML = '✅ Service Worker is registered and active<br>✅ App will work offline<br>📱 You can install this app on your phone';
+                    } else {
+                        badge.textContent = 'NOT REGISTERED';
+                        badge.className = 'badge badge-warning';
+                        card.className = 'status-card warning';
+                        details.innerHTML = '⚠️ Service Worker API available but not registered<br>📝 Add registration code to index.html';
+                    }
+                }).catch(function() {
+                    badge.textContent = 'ERROR';
+                    badge.className = 'badge badge-error';
+                    card.className = 'status-card error';
+                    details.innerHTML = '❌ Could not check service worker status';
+                });
+            } else {
+                badge.textContent = 'NOT SUPPORTED';
+                badge.className = 'badge badge-error';
+                card.className = 'status-card error';
+                details.innerHTML = '❌ This browser does not support Service Workers';
+            }
+        }
+
+        function checkReact() {
+            const badge = document.getElementById('react-badge');
+            const details = document.getElementById('react-details');
+            const card = document.getElementById('react-card');
+            
+            // Check if React is loaded
+            const hasReact = typeof React !== 'undefined';
+            const hasReactDOM = typeof ReactDOM !== 'undefined';
+            
+            if (hasReact || hasReactDOM) {
+                badge.textContent = 'DETECTED';
+                badge.className = 'badge badge-success';
+                card.className = 'status-card success';
+                details.innerHTML = '✅ React is present in your project<br>⚛️ React components available';
+            } else {
+                badge.textContent = 'NOT DETECTED';
+                badge.className = 'badge badge-info';
+                card.className = 'status-card';
+                details.innerHTML = '❌ React not detected<br>📝 Your project uses plain HTML/CSS/JavaScript<br>💡 This is fine - React is optional';
+            }
+        }
+
+        function checkVue() {
+            const badge = document.getElementById('vue-badge');
+            const details = document.getElementById('vue-details');
+            const card = document.getElementById('vue-card');
+            
+            // Check if Vue is loaded
+            const hasVue = typeof Vue !== 'undefined';
+            
+            if (hasVue) {
+                badge.textContent = 'DETECTED';
+                badge.className = 'badge badge-success';
+                card.className = 'status-card success';
+                details.innerHTML = '✅ Vue.js is present in your project<br>💚 Vue components available';
+            } else {
+                badge.textContent = 'NOT DETECTED';
+                badge.className = 'badge badge-info';
+                card.className = 'status-card';
+                details.innerHTML = '❌ Vue.js not detected<br>📝 Your project uses plain HTML/CSS/JavaScript<br>💡 This is fine - Vue is optional';
+            }
+        }
+
+        function checkPushNotifications() {
+            const badge = document.getElementById('push-badge');
+            const details = document.getElementById('push-details');
+            const card = document.getElementById('push-card');
+            
+            if (!('Notification' in window)) {
+                badge.textContent = 'NOT SUPPORTED';
+                badge.className = 'badge badge-error';
+                card.className = 'status-card error';
+                details.innerHTML = '❌ This browser does not support notifications';
+                return;
+            }
+            
+            const permission = Notification.permission;
+            
+            if (permission === 'granted') {
+                badge.textContent = 'ENABLED';
+                badge.className = 'badge badge-success';
+                card.className = 'status-card success';
+                details.innerHTML = '✅ Push notifications are ENABLED<br>🔔 You will receive important updates';
+            } else if (permission === 'denied') {
+                badge.textContent = 'BLOCKED';
+                badge.className = 'badge badge-warning';
+                card.className = 'status-card warning';
+                details.innerHTML = '⚠️ Notifications are blocked<br>📝 Click the lock icon in address bar → Allow notifications';
+            } else {
+                badge.textContent = 'PENDING';
+                badge.className = 'badge badge-warning';
+                card.className = 'status-card warning';
+                details.innerHTML = '⏳ Notification permission not set<br>🔘 Click "Test Notification" to enable';
+            }
+        }
+
+        // Test notification button
+        document.getElementById('notifyBtn').addEventListener('click', function() {
+            if ('Notification' in window) {
+                if (Notification.permission === 'granted') {
+                    new Notification('🔔 University Comm Hub', {
+                        body: 'Push notifications are working! You will receive important updates here.',
+                        icon: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Crect width="100" height="100" fill="%23667eea"/%3E%3Ctext x="50" y="67" font-size="50" text-anchor="middle" fill="white"%3E📚%3C/text%3E%3C/svg%3E'
+                    });
+                } else if (Notification.permission !== 'denied') {
+                    Notification.requestPermission().then(function(permission) {
+                        if (permission === 'granted') {
+                            new Notification('✅ Notifications Enabled!', {
+                                body: 'You will now receive important updates from University Comm Hub.',
+                                icon: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Crect width="100" height="100" fill="%23667eea"/%3E%3Ctext x="50" y="67" font-size="50" text-anchor="middle" fill="white"%3E📚%3C/text%3E%3C/svg%3E'
+                            });
+                            checkPushNotifications();
+                        }
+                    });
+                } else {
+                    alert('Notifications are blocked. Please check your browser settings.');
+                }
+            } else {
+                alert('This browser does not support notifications');
+            }
+        });
+    </script>
+</body>
+</html>
