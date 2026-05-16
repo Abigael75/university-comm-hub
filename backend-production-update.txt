@@ -1,0 +1,14 @@
+﻿// Add this to your backend/server.js (at the top after imports)
+const path = require('path');
+
+// Serve static files from frontend in production
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../frontend')));
+    
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, '../frontend', 'index.html'));
+    });
+}
+
+// Use PORT from environment variable (Render sets this)
+const PORT = process.env.PORT || 3001;
