@@ -8,7 +8,7 @@ const User = require('./models/User');
 await sequelize.sync({ alter: true });
 console.log('? Database tables synced');
 // Find this section:
-await testConnection();
+await testConnection();`n    await sequelize.sync({ alter: true });`n    console.log("? Database tables synced");
 await sequelize.sync({ alter: true });
 console.log('? Database tables synced');
 
@@ -203,7 +203,7 @@ app.listen(PORT, async () => {
     console.log('='.repeat(50));
     console.log('Server running on http://localhost:' + PORT);
     
-    await testConnection();
+    await testConnection();`n    await sequelize.sync({ alter: true });`n    console.log("? Database tables synced");
 await sequelize.sync({ alter: true });
 console.log('? Database tables synced');
 
@@ -247,4 +247,5 @@ app.delete('/api/admin/users/:id', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
 
