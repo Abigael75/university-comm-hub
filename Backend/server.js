@@ -1,10 +1,24 @@
-﻿const express = require('express');
+const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { sequelize, testConnection } = require('./config/database');
 const User = require('./models/User');
+// Sync database tables (create if not exist)
+await sequelize.sync({ alter: true });
+console.log('? Database tables synced');
+// Find this section:
+await testConnection();
+await sequelize.sync({ alter: true });
+console.log('? Database tables synced');
 
+
+// Add this line right after:
+await sequelize.sync({ alter: true });
+console.log('? Database tables synced');
+
+// Then the user count code:
+const userCount = await User.count();
 const app = express();
 const PORT = 3001;
 
@@ -190,6 +204,9 @@ app.listen(PORT, async () => {
     console.log('Server running on http://localhost:' + PORT);
     
     await testConnection();
+await sequelize.sync({ alter: true });
+console.log('? Database tables synced');
+
     
     // Count users in database
     const userCount = await User.count();
@@ -230,3 +247,4 @@ app.delete('/api/admin/users/:id', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
